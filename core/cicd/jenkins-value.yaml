@@ -16,7 +16,8 @@ controller:
     storageClass: "local-path"
     size: "8Gi"
 
-  adminUser: "admin"
+  admin:
+    username: "admin"
 
   serviceType: ClusterIP
   servicePort: 8080
