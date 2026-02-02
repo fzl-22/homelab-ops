@@ -1,0 +1,26 @@
+controller:
+  image: "jenkins/jenkins"
+  tag: "lts-jdk25"
+
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "1024Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2048Mi"
+
+  persistence:
+    enabled: true
+    storageClass: "local-path"
+    size: "8Gi"
+
+  adminUser: "admin"
+
+  serviceType: ClusterIP
+  servicePort: 8080
+
+agent:
+  enabled: true
+  image: "jenkins/inbound-agent"
+  tag: "jdk25"
