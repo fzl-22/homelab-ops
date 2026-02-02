@@ -23,10 +23,13 @@ controller:
   servicePort: 8080
 
   installPlugins:
+    # Defaults
     - kubernetes:4423.vb_59f230b_ce53
     - workflow-aggregator:608.v67378e9d3db_1
     - git:5.9.0
     - configuration-as-code:2037.v8e5349845172
+    # Additions
+    - pipeline-stage-view:2.39
     - pipeline-graph-view:763.v0e91db_e845ee
 
 agent:
