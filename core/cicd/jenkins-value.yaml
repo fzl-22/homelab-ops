@@ -1,6 +1,7 @@
 controller:
-  image: "jenkins/jenkins"
-  tag: "lts-jdk25"
+  image:
+    repository: "jenkins/jenkins"
+    tag: "lts-jdk25"
 
   resources:
     requests:
@@ -22,5 +23,6 @@ controller:
 
 agent:
   enabled: true
-  image: "jenkins/inbound-agent"
-  tag: "jdk25"
+  image:
+    repository: "jenkins/inbound-agent"
+    tag: "jdk25"
