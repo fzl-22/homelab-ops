@@ -31,6 +31,7 @@ controller:
     - git:5.9.0
     - configuration-as-code:2037.v8e5349845172
     # Additions
+    - blueocean:1.27.25
     - pipeline-stage-view:2.39
     - pipeline-graph-view:763.v0e91db_e845ee
 
