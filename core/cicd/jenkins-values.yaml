@@ -34,6 +34,7 @@ controller:
     - blueocean:1.27.25
     - pipeline-stage-view:2.39
     - pipeline-graph-view:763.v0e91db_e845ee
+    - github:1.45.0
 
 agent:
   enabled: true
