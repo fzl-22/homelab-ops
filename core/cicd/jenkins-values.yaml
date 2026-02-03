@@ -11,6 +11,8 @@ controller:
       cpu: "1000m"
       memory: "2048Mi"
 
+  jenkinsUrl: "https://jenkins.ahmadfaisal.space/"
+
   persistence:
     enabled: true
     storageClass: "local-path"
