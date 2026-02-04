@@ -5,6 +5,19 @@ metadata:
   namespace: default
   labels:
     app: cloudflared
+data:
+  config.yaml:
+    tunnel:
+    credentials-file:
+
+    ingress:
+      - hostname: gitea.ahmadfaisal.space
+        service: http://gitea.default.svc.cluster.local:3000
+
+      - hostname: jenkins.ahmadfaisal.space
+        service: http://jenkins.jenkins.svc.cluster.local:8080
+
+      - service: http_status:404
 spec:
   selector:
     matchLabels:
