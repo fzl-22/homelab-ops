@@ -35,6 +35,7 @@ controller:
     - pipeline-stage-view:2.39
     - pipeline-graph-view:763.v0e91db_e845ee
     - github:1.45.0
+    - build-user-vars-plugin:212.vd6b_e9f6d0cdb_
 
 agent:
   enabled: true
