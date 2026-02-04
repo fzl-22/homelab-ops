@@ -43,6 +43,8 @@ spec:
               value: "1000"
             - name: GITEA__server__HTTP_PORT
               value: "3000"
+            - name: GITEA__server__START_SSH_SERVER
+              value: "true"
             - name: GITEA__server__SSH_PORT
               value: "2222"
             - name: GITEA__server__SSH_LISTEN_PORT
