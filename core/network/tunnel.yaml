@@ -39,7 +39,8 @@ spec:
           image: cloudflare/cloudflared:1815-d7c62aed71e2
           args:
             - tunnel
-            - --config /etc/cloudflared/config/config.yaml
+            - --config
+            - /etc/cloudflared/config/config.yaml
             - run
           env:
             - name: TUNNEL_TOKEN
