@@ -1,3 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+  namespace: default
+data:
+  config.yaml: |
+    ingress:
+      - hostname: gitea.ahmadfaisal.space
+        service: http://gitea.default.svc.cluster.local:3000
+      
+      - hostname: ssh-gitea.ahmadfaisal.space
+        service: ssh://gitea.default.svc.cluster.local:2222
+      
+      - hostname: jenkins.ahmadfaisal.space
+        service: http://jenkins.jenkins.svc.cluster.local:8080
+        
+      - service: http_status:404
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,19 +24,6 @@ metadata:
   namespace: default
   labels:
     app: cloudflared
-data:
-  config.yaml:
-    tunnel: 9ed1e154-1856-4c11-ba08-471262ac037c
-    credentials-file: tunnel-credentials
-
-    ingress:
-      - hostname: gitea.ahmadfaisal.space
-        service: http://gitea.default.svc.cluster.local:3000
-
-      - hostname: jenkins.ahmadfaisal.space
-        service: http://jenkins.jenkins.svc.cluster.local:8080
-
-      - service: http_status:404
 spec:
   selector:
     matchLabels:
@@ -33,7 +39,7 @@ spec:
           image: cloudflare/cloudflared:1815-d7c62aed71e2
           args:
             - tunnel
-            - --no-autoupdate
+            - --config /etc/cloudflared/config/config.yaml
             - run
           env:
             - name: TUNNEL_TOKEN
@@ -41,6 +47,10 @@ spec:
                 secretKeyRef:
                   name: tunnel-credentials
                   key: token
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cloudflared/config
+              readOnly: true
           resources:
             requests:
               cpu: 10m
@@ -48,3 +58,7 @@ spec:
             limits:
               cpu: 100m
               memory: 128Mi
+      volumes:
+        - name: config
+          configMap:
+            name: cloudflared-config
