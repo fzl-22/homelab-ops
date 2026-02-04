@@ -48,7 +48,7 @@ spec:
             - name: GITEA__server__SSH_LISTEN_PORT
               value: "2222"
             - name: GITEA__server__SSH_DOMAIN
-              value: "ssh.gitea.ahmadfaisal.space"
+              value: "ssh-gitea.ahmadfaisal.space"
           volumeMounts:
             - name: gitea-data
               mountPath: /data
