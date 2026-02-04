@@ -7,8 +7,8 @@ metadata:
     app: cloudflared
 data:
   config.yaml:
-    tunnel:
-    credentials-file:
+    tunnel: 9ed1e154-1856-4c11-ba08-471262ac037c
+    credentials-file: tunnel-credentials
 
     ingress:
       - hostname: gitea.ahmadfaisal.space
