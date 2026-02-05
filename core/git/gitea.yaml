@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gitea-data
-  namespace: default
+  namespace: git
 spec:
   accessModes:
     - ReadWriteOnce
@@ -15,7 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gitea
-  namespace: default
+  namespace: git
   labels:
     app: gitea
 spec:
@@ -70,7 +70,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: gitea
-  namespace: default
+  namespace: git
 spec:
   type: ClusterIP
   selector:
