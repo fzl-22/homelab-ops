@@ -15,78 +15,92 @@ This repository contains the core infrastructure for my personal homelab. I use 
 ## Repository Structure
 
 - `core/`: This directory contains the core infrastructure for my homelab.
-  - `network/`: This directory contains the networking configuration for my homelab.
-    - `tunnel.yaml`: Defines the Cloudflare Tunnel deployment (configured via Cloudflare One Dashboard).
-  - `cicd/`: This directory contains the Jenkins configuration.
-    - `jenkins-rbac.yaml`: Defines RBAC permissions for Jenkins to deploy to the cluster.
-    - `jenkins-value.yaml`: Contains Helm chart overrides for Jenkins (plugins, resources, Gitea integration).
-  - `git/`: This directory contains the Gitea configuration.
-    - `gitea.yaml`: Defines the self-hosted Gitea instance (Deployment, Service, and PVC).
-- `scripts/`: This directory contains a collection of utility scripts that I use to manage my homelab.
-- `README.md`: This file contains the documentation for my homelab.
+  - `networking/`: Networking configurations.
+    - `cloudflared/`: Cloudflare Tunnel deployment (Dashboard Mode).
+  - `cicd/`: CI/CD configurations.
+    - `jenkins/`: Jenkins Helm values and RBAC permissions.
+  - `git/`: Source control configurations.
+    - `gitea/`: Self-hosted Gitea manifests (Deployment, Service, PVC).
+  - `observability/`: Monitoring and Visualization.
+    - `headlamp/`: Headlamp dashboard Helm values and Admin RBAC.
+- `scripts/`: Utility scripts for management.
+- `README.md`: Documentation.
 
 ### Technology Stack
 
+* **Platform:** Kubernetes (K3s) on Ubuntu Server
+* **Networking:** Cloudflare Tunnel (Zero Trust)
+* **CI/CD:** Jenkins (Kaniko & Blue Ocean)
+* **Version Control:** Gitea
+* **Observability:** Headlamp (Kubernetes Dashboard)
+* **Storage:** Local Path Provisioner
+
 ## Overview
 
-- **Cluster**: I'm running a lightweight K3s cluster on an old ASUS laptop running Ubuntu Server. I chose K3s because it's easy to install and manage, and it's perfect for a small homelab like mine.
-- **Ingress**: I use a Cloudflare Tunnel to expose my services to the internet. This means I don't have to open any ports on my router, which is great for security. The tunnel is configured to point to my K3s cluster, so I can easily expose any service to the internet just by creating a new Ingress resource.
-- **CI/CD**: I'm using Jenkins to build and deploy my applications. I've configured it to use Kaniko to build Docker images inside the cluster and store them into GHCR.
-- **Deployments**: I'm using `kubectl` to deploy my applications. I've also set up RBAC to ensure that Jenkins only has the permissions it needs to deploy applications.
+I utilize a **Namespace-Layered Architecture** to keep the cluster clean and isolated:
+* **`networking`**: Contains the Cloudflare Tunnel.
+* **`git`**: Contains Gitea.
+* **`cicd`**: Contains Jenkins.
+* **`observability`**: Contains Headlamp.
+* **`personal`**: (Planned) For personal projects like Portfolio.
 
 ## Prerequisites
 
-- **Kubernetes Cluster**: You'll need a Kubernetes cluster to run the applications. I'm using K3s, but any Kubernetes distribution should work.
-- **Helm**: I'm using Helm to manage the Jenkins deployment. You'll need to have Helm installed and configured to work with your cluster.
-- **Cloudflare Account**: I'm using a Cloudflare Tunnel to expose my services to the internet. You'll need a Cloudflare account to create and manage the tunnel.
-- **kubectl**: You'll need `kubectl` to interact with your cluster. Make sure it's configured to talk to your cluster.
+- **Kubernetes Cluster**: K3s recommended.
+- **Helm**: Required for Jenkins and Headlamp.
+- **Cloudflare Account**: For the tunnel.
+- **kubectl**: Configured for your cluster.
 
 ## Secret Management
 
-I don't store any credentials in this repository. You'll need to create the following secrets manually before you can deploy the corresponding manifests.
+Secrets must be created in their specific namespaces.
 
 ### 1. Cloudflare Tunnel
 
-This secret is required for the Cloudflare Tunnel to connect to the Cloudflare network.
+Required for the Cloudflare Tunnel to connect to the Cloudflare network.
 
 ```bash
+kubectl create namespace networking
+
 kubectl create secret generic tunnel-credentials \
     --from-literal=token='<YOUR_CLOUDFLARE_TOKEN>' \
-    --namespace=default
+    --namespace=networking
 ```
 
 ### 2. GitHub Credentials
 
-This secret is required for Jenkins to authenticate with GitHub and push images to GHCR.
+Required for Jenkins to push images to GHCR.
 
 ```bash
-# 1. Create the secret
+kubectl create namespace cicd
+
 kubectl create secret generic github-credentials \
-    --namespace jenkins \
+    --namespace cicd \
     --from-literal=username='<GITHUB_USERNAME>' \
     --from-literal=password='<GITHUB_TOKEN>'
 
-# 2. Label the secret for Jenkins
-kubectl label secret github-credentials "jenkins.io/credentials-type=usernamePassword" -n jenkins
-kubectl annotate secret github-credentials "jenkins.io/credentials-description=GitHub User & Token" "jenkins.io/credentials-model-username-key=username" "jenkins.io/credentials-model-password-key=password" -n jenkins
+kubectl label secret github-credentials "jenkins.io/credentials-type=usernamePassword" -n cicd
+
+kubectl annotate secret github-credentials "jenkins.io/credentials-description=GitHub User & Token" "jenkins.io/credentials-model-username-key=username" "jenkins.io/credentials-model-password-key=password" -n cicd
 ```
 
 ### 3. Gitea Credentials
 
+Required for Jenkins to scan private Gitea repos.
+
 ```bash
-# Create the secret in Jenkins namespace
 kubectl create secret generic gitea-credentials \
-    --namespace jenkins \
+    --namespace cicd \
     --from-literal=token='<YOUR_GITEA_TOKEN>'
 
-# Label it for Jenkins Credential Manager
-kubectl label secret gitea-credentials "jenkins.io/credentials-type=secretText" -n jenkins
-kubectl annotate secret gitea-credentials "jenkins.io/credentials-description=Gitea Personal Access Token" "jenkins.io/credentials-model-secret-text-key=token" -n jenkins
+kubectl label secret gitea-credentials "jenkins.io/credentials-type=secretText" -n cicd
+
+kubectl annotate secret gitea-credentials "jenkins.io/credentials-description=Gitea Personal Access Token" "jenkins.io/credentials-model-secret-text-key=token" -n cicd
 ```
 
 ### 4. GHCR Pull Secrets
 
-This secret is required for the cluster to pull private images from GHCR.
+Required in any namespace where you pull private images (e.g., cicd for `agents`, `personal` for apps).
 
 ```bash
 kubectl create secret docker-registry ghcr-pull-secrets \
@@ -94,33 +108,78 @@ kubectl create secret docker-registry ghcr-pull-secrets \
     --docker-username=<GITHUB_USERNAME> \
     --docker-password=<GITHUB_TOKEN> \
     --docker-email=<YOUR_EMAIL> \
-    -n default
+    -n personal
 ```
 
 ## Deployment Guide
 
-1.  **Deploy the Cloudflare Tunnel**:
+1.  **Networking Layer**:
 
+    Deploy the Cloudflare Tunnel to the `networking` namespace.
+    
     ```bash
-    kubectl apply -f core/network/tunnel.yaml
+    kubectl apply -f core/networking/cloudflared/values.yaml
     ```
 
-2.  **Set up RBAC for Jenkins**:
+2. **Git Layer**:
+    
+    Deploy Gitea to the `git` namespace.
 
     ```bash
-    kubectl apply -f core/cicd/jenkins-rbac.yaml
+    kubectl create namespace git
+
+    kubectl apply -f core/git/gitea/values.yaml
     ```
 
-3.  **Install or update Jenkins**:
+3.  **Observability Layer (Headlamp)**:
+
+    Deploy Headlamp to `observability` using Helm.
 
     ```bash
-    helm upgrade --install jenkins jenkins/jenkins \
-        --namespace jenkins \
+    kubectl create namespace observability
+
+    kubectl apply -f core/observability/headlamp/rbac.yaml
+
+    helm repo add headlamp [https://kubernetes-sigs.github.io/headlamp/](https://kubernetes-sigs.github.io/headlamp/)
+
+    helm upgrade --install headlamp headlamp/headlamp \
+        --namespace observability \
         --create-namespace \
-        -f core/cicd/jenkins-values.yaml
+        -f core/observability/headlamp/values.yaml
     ```
+
+4.  **Deploy CI/CD (Jenkins)**:
+
+    Deploy Jenkins to the `cicd` namespace.
+
+    ```bash
+    kubectl apply -f core/cicd/jenkins/rbac.yaml
+
+    helm upgrade --install jenkins jenkins/jenkins \
+        --namespace cicd \
+        --create-namespace \
+        -f core/cicd/jenkins/values.yaml
+    ```
+
+3.  **Deploy Git (Gitea)**:
+    ```bash
+    kubectl apply -f core/git/gitea/values.yaml
+    ```
+
 
 ## Operations & Troubleshooting
+
+### Accessing Headlamp Dashboard
+
+Headlamp is secured via a Service Account Token.
+
+1. Generate the Login Token:
+
+    ```
+    kubectl create token headlamp-admin -n observability --duration=2400h
+    ```
+
+2. Navigate to the dashboard URL and paste the token.
 
 ### SSH Access to Gitea
 
@@ -134,12 +193,12 @@ Gitea SSH is exposed on port 2222. You must configure your local SSH config or s
 If Jenkins gets stuck in a `Completed (0/2)` state after a server reboot, you can fix it by deleting the pod. Kubernetes will automatically create a new one.
 
 ```bash
-kubectl delete pod jenkins-0 -n jenkins
+kubectl delete pod jenkins-0 -n cicd
 ```
 
 ### Graceful Shutdown
 
-To avoid corrupting the Jenkins database, you should always shut down the server gracefully.
+To avoid corrupting the Jenkins or Gitea database, you should always shut down the server gracefully.
 
 ```bash
 sudo shutdown now
