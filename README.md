@@ -16,10 +16,12 @@ This repository contains the core infrastructure for my personal homelab. I use 
 
 - `core/`: This directory contains the core infrastructure for my homelab.
   - `network/`: This directory contains the networking configuration for my homelab.
-    - `tunnel.yaml`: This file defines the Cloudflare Tunnel that I use to expose my services to the internet.
+    - `tunnel.yaml`: Defines the Cloudflare Tunnel deployment (configured via Cloudflare One Dashboard).
   - `cicd/`: This directory contains the Jenkins configuration.
     - `jenkins-rbac.yaml`: Defines RBAC permissions for Jenkins to deploy to the cluster.
-    - `jenkins-value.yaml`: Contains Helm chart overrides for Jenkins (plugins, resources, proxy settings).
+    - `jenkins-value.yaml`: Contains Helm chart overrides for Jenkins (plugins, resources, Gitea integration).
+  - `git/`: This directory contains the Gitea configuration.
+    - `gitea.yaml`: Defines the self-hosted Gitea instance (Deployment, Service, and PVC).
 - `scripts/`: This directory contains a collection of utility scripts that I use to manage my homelab.
 - `README.md`: This file contains the documentation for my homelab.
 
@@ -69,7 +71,20 @@ kubectl label secret github-credentials "jenkins.io/credentials-type=usernamePas
 kubectl annotate secret github-credentials "jenkins.io/credentials-description=GitHub User & Token" "jenkins.io/credentials-model-username-key=username" "jenkins.io/credentials-model-password-key=password" -n jenkins
 ```
 
-### 3. GHCR Pull Secrets
+### 3. Gitea Credentials
+
+```bash
+# Create the secret in Jenkins namespace
+kubectl create secret generic gitea-credentials \
+    --namespace jenkins \
+    --from-literal=token='<YOUR_GITEA_TOKEN>'
+
+# Label it for Jenkins Credential Manager
+kubectl label secret gitea-credentials "jenkins.io/credentials-type=secretText" -n jenkins
+kubectl annotate secret gitea-credentials "jenkins.io/credentials-description=Gitea Personal Access Token" "jenkins.io/credentials-model-secret-text-key=token" -n jenkins
+```
+
+### 4. GHCR Pull Secrets
 
 This secret is required for the cluster to pull private images from GHCR.
 
@@ -106,6 +121,13 @@ kubectl create secret docker-registry ghcr-pull-secrets \
     ```
 
 ## Operations & Troubleshooting
+
+### SSH Access to Gitea
+
+Gitea SSH is exposed on port 2222. You must configure your local SSH config or specific remote URLs to use this port.
+
+* Hostname: `ssh-gitea.ahmadfaisal.space` (or your configured SSH domain)
+* Port: `2222`
 
 ### Fixing a Stuck Jenkins Pod
 
