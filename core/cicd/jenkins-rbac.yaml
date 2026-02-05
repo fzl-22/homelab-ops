@@ -21,6 +21,6 @@ subjects:
   name: cicd
   namespace: jenkins
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: jenkins-deploy-manager
   apiGroup: rbac.authorization.k8s.io
