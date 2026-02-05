@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  namespace: cicd
   name: jenkins-deploy-manager
+  namespace: cicd
 rules:
 - apiGroups: ["apps"]
   resources: ["deployments", "statefulsets", "daemonsets"]
@@ -18,8 +18,8 @@ metadata:
   namespace: cicd
 subjects:
 - kind: ServiceAccount
-  name: cicd
-  namespace: jenkins
+  name: default
+  namespace: cicd
 roleRef:
   kind: ClusterRole
   name: jenkins-deploy-manager
