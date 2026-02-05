@@ -1,0 +1,23 @@
+deployment:
+  replicaCount: 1
+
+ingress:
+  enabled: false
+
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 256Mi
+
+persistentVolumeClaims:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 1Gi
+  storageClassName: "local-path"
