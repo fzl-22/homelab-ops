@@ -59,6 +59,13 @@ pipeline {
             sh 'kubectl apply -f ./core/networking/cloudflared/cloudflared.yaml'
           }
         }
+        container('kubectl') {
+          script {
+            echo "Deploying Git..."
+            sh 'kubectl create namespace git --dry-run=client -o yaml | kubectl apply -f -'
+            sh 'kubectl apply -f ./core/git/gitea/gitea.yaml'
+          }
+        }
       }
     }
   }
