@@ -31,15 +31,19 @@ pipeline {
     stage('Validate') {
       steps {
         container('kubectl') {
-          echo "Checking Kubernetes Manifests..."
+          echo "Validatig Raw Manifests..."
           sh 'kubectl apply --dry-run=client -f core/networking/cloudflared/values.yaml'
           sh 'kubectl apply --dry-run=client -f core/git/gitea/values.yaml'
-          sh 'kubectl apply --dry-run=client -f core/cicd/jenkins/values.yaml'
+          sh 'kubectl apply --dry-run=client -f core/observability/rbac.yaml'
+          sh 'kubectl apply --dry-run=client -f core/cicd/jenkins/rbac.yaml'
         }
         container('helm') {
-          echo "Linting Helm Values..."
+          echo "Validating Helm Charts..."
+
           sh 'helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/'
           sh 'helm template headlamp headlamp/headlamp -f core/observability/headlamp/values.yaml'
+          sh 'helm repo add jenkins https://charts.jenkins.io'
+          sh 'helm template jenkins jenkins/jenkins -f core/cicd/jenkins/values.yaml'
         }
       }
     }
