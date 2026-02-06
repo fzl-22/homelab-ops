@@ -3,7 +3,7 @@ pipeline {
     kubernetes {
       yaml '''
       apiVersion: v1
-      kind: pod
+      kind: Pod
       spec:
         serviceAccountName: default
         containers:
