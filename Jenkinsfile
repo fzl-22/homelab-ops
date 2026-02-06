@@ -32,10 +32,10 @@ pipeline {
       steps {
         container('kubectl') {
           echo "Validatig Raw Manifests..."
-          sh 'kubectl apply --dry-run=client -f core/networking/cloudflared/values.yaml'
-          sh 'kubectl apply --dry-run=client -f core/git/gitea/values.yaml'
-          sh 'kubectl apply --dry-run=client -f core/observability/rbac.yaml'
-          sh 'kubectl apply --dry-run=client -f core/cicd/jenkins/rbac.yaml'
+          sh 'kubectl apply --dry-run=client -f ./core/networking/cloudflared/values.yaml'
+          sh 'kubectl apply --dry-run=client -f ./core/git/gitea/values.yaml'
+          sh 'kubectl apply --dry-run=client -f ./core/observability/headlamp/rbac.yaml'
+          sh 'kubectl apply --dry-run=client -f ./core/cicd/jenkins/rbac.yaml'
         }
         container('helm') {
           echo "Validating Helm Charts..."
