@@ -46,5 +46,20 @@ pipeline {
         }
       }
     }
+
+    stage('Deploy Infrastructure') {
+      when {
+        branch 'master'
+      }
+      steps {
+        container('kubectl') {
+          script {
+            echo "Deploying Networking..."
+            sh 'kubectl create namespace networking --dry-run=client -o yaml | kubectl apply -f -'
+            sh 'kubectl apply -f ./core/networking/cloudflared/cloudflared.yaml'
+          }
+        }
+      }
+    }
   }
 }
