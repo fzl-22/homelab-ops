@@ -39,7 +39,6 @@ pipeline {
         }
         container('helm') {
           echo "Validating Helm Charts..."
-
           sh 'helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/'
           sh 'helm template headlamp headlamp/headlamp -f core/observability/headlamp/values.yaml'
           sh 'helm repo add jenkins https://charts.jenkins.io'
