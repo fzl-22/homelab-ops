@@ -118,7 +118,7 @@ kubectl create secret docker-registry ghcr-pull-secrets \
     Deploy the Cloudflare Tunnel to the `networking` namespace.
     
     ```bash
-    kubectl apply -f core/networking/cloudflared/values.yaml
+    kubectl apply -f core/networking/cloudflared/cloudflared.yaml
     ```
 
 2. **Git Layer**:
@@ -128,7 +128,7 @@ kubectl create secret docker-registry ghcr-pull-secrets \
     ```bash
     kubectl create namespace git
 
-    kubectl apply -f core/git/gitea/values.yaml
+    kubectl apply -f core/git/gitea/gitea.yaml
     ```
 
 3.  **Observability Layer (Headlamp)**:
@@ -160,12 +160,6 @@ kubectl create secret docker-registry ghcr-pull-secrets \
         --create-namespace \
         -f core/cicd/jenkins/values.yaml
     ```
-
-3.  **Deploy Git (Gitea)**:
-    ```bash
-    kubectl apply -f core/git/gitea/values.yaml
-    ```
-
 
 ## Operations & Troubleshooting
 
