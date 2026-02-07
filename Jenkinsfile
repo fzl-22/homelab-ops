@@ -116,4 +116,14 @@ pipeline {
       }
     }
   }
+
+  post {
+    success {
+      echo "Infrastructure successfully synced!"
+    }
+
+    failure {
+      echo "Deployment failed. Check pipeline logs."
+    }
+  }
 }
