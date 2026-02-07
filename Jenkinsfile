@@ -52,6 +52,7 @@ pipeline {
         branch 'master'
       }
       steps {
+        // Networking Layer
         container('kubectl') {
           script {
             echo "Deploying Networking..."
@@ -59,11 +60,34 @@ pipeline {
             sh 'kubectl apply -f ./core/networking/cloudflared/cloudflared.yaml'
           }
         }
+
+        // Git Layer
         container('kubectl') {
           script {
             echo "Deploying Git..."
             sh 'kubectl create namespace git --dry-run=client -o yaml | kubectl apply -f -'
             sh 'kubectl apply -f ./core/git/gitea/gitea.yaml'
+          }
+        }
+
+        // Observability Layer
+        container('helm') {
+          script {
+            echo "Deploying Observability..."
+            sh "helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/"
+            sh "helm repo update headlamp"
+            sh '''
+              helm upgrade --install headlamp headlamp/headlamp \
+                --namespace observability \
+                --values core/observability/headlamp/values.yaml \
+                --wait
+            '''
+          }
+        }
+
+        container('kubectl') {
+          script {
+            sh "kubectl apply -f ./core/observability/headlamp/rbac.yaml"
           }
         }
       }
