@@ -90,6 +90,28 @@ pipeline {
             sh "kubectl apply -f ./core/observability/headlamp/rbac.yaml"
           }
         }
+
+        // CI/CD Layer
+        container('helm') {
+          script {
+            echo "Deploying CI/CD..."
+            sh "helm repo add jenkins https://charts.jenkins.io"
+            sh "helm repo update jenkins"
+            sh '''
+              helm upgrade --install jenkins jenkins/jenkins \
+                --namespace cicd \
+                --create-namespace \
+                -f ./core/cicd/jenkins/values.yaml \
+                --wait
+            '''
+          }
+        }
+
+        container('kubectl') {
+          script {
+            sh "kubectl apply -f ./core/cicd/jenkins/rbac.yaml"
+          }
+        }
       }
     }
   }
