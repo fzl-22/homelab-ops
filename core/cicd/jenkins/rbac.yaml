@@ -4,17 +4,27 @@ metadata:
   name: jenkins-deploy-manager
 rules:
 - apiGroups: ["apps"]
-  resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
+  resources: ["deployments", "statefulsets", "daemonsets", "replicasets", "deletecollection"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses", "ingressclasses", "networkpolicies"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
-  resources: ["services", "pods", "configmaps", "secrets", "persistentvolumeclaims", "serviceaccounts", "namespaces"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  resources:
+    - "services"
+    - "pods"
+    - "pods/exec"
+    - "pods/log"
+    - "configmaps"
+    - "secrets"
+    - "persistentvolumeclaims"
+    - "serviceaccounts"
+    - "namespaces"
+    - "events"
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
 - apiGroups: ["batch"]
   resources: ["jobs", "cronjobs"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
