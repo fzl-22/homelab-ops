@@ -79,7 +79,8 @@ pipeline {
             sh '''
               helm upgrade --install headlamp headlamp/headlamp \
                 --namespace observability \
-                --values core/observability/headlamp/values.yaml \
+                --create-namespace \
+                -f ./core/observability/headlamp/values.yaml \
                 --wait
             '''
           }
